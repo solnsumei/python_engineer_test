@@ -1,5 +1,5 @@
 # Python Engineer Professional Test
-
+Application solution to generate schema from json files
 
 ### How to Run
 - from your terminal, cd into the project directory
