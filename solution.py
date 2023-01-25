@@ -19,7 +19,42 @@ def map_field(field: Any) -> dict:
     :param field: Any
     :return: dict
     """
-    pass
+    # Create default values
+    mapped_value = {
+        "tag": "",
+        "description": "",
+        "required": False
+    }
+    # Creating a field_type variable to maintain consistency and avoid typo
+    field_type = 'type'
+    if type(field) == bool:
+        mapped_value[field_type] = FieldType.BOOLEAN
+    elif type(field) == str:
+        mapped_value[field_type] = FieldType.STRING
+    elif type(field) == int:
+        mapped_value[field_type] = FieldType.INTEGER
+    elif type(field) == float:
+        mapped_value[field_type] = FieldType.FLOAT
+    elif type(field) == list:
+        if len(field) > 0:
+            if type(field[0]) == str:
+                mapped_value[field_type] = FieldType.ENUM
+            elif type(field[0] == dict):
+                mapped_value[field_type] = FieldType.ARRAY
+                items_schema = {
+                    field_type: FieldType.OBJECT,
+                    'schema': create_schema(field[0])
+                }
+                mapped_value['items'] = items_schema
+        else:
+            mapped_value[field_type] = FieldType.ENUM
+    elif type(field) == dict:
+        mapped_value[field_type] = FieldType.OBJECT
+        # if the dictionary(object) field has attributes, create schema for them.
+        if len(field) > 0:
+            # Make a recursive call to create_schema
+            mapped_value['schema'] = create_schema(field)
+    return mapped_value
 
 
 def create_schema(message: dict) -> dict:
@@ -28,7 +63,10 @@ def create_schema(message: dict) -> dict:
     :param message: dict
     :return: dict
     """
-    pass
+    schema = {}
+    for key, value in message.items():
+        schema[key] = map_field(value)
+    return schema
 
 
 def generate_schema_from_file(source_file: str, output_file: str) -> str | None:
