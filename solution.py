@@ -43,6 +43,7 @@ def map_field(field: Any) -> dict:
                 mapped_value[field_type] = FieldType.ENUM
             elif type(field[0] == dict):
                 mapped_value[field_type] = FieldType.ARRAY
+                # Create schema for the object attributes in the array
                 items_schema = {
                     field_type: FieldType.OBJECT,
                     'schema': create_schema(field[0])
