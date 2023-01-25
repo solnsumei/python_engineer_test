@@ -1,4 +1,6 @@
 # Create enum field types
+import json
+import os
 from enum import Enum
 from typing import Any
 
@@ -52,7 +54,7 @@ def map_field(field: Any) -> dict:
         mapped_value[field_type] = FieldType.OBJECT
         # if the dictionary(object) field has attributes, create schema for them.
         if len(field) > 0:
-            # Make a recursive call to create_schema
+            # Make a recursive call to create_schema for child nodes
             mapped_value['schema'] = create_schema(field)
     return mapped_value
 
@@ -76,4 +78,21 @@ def generate_schema_from_file(source_file: str, output_file: str) -> str | None:
     :param output_file: str
     :return: None
     """
-    pass
+    try:
+        with open(source_file) as f:
+            data = json.load(f)
+            if 'message' not in data:
+                print('No message field in data, exiting...')
+                return
+
+        # Create schema for file data
+        schema = create_schema(data['message'])
+
+        # Setup output file
+        output_filename = f'schema/{output_file}.json'
+        with open(output_filename, 'w') as f:
+            json.dump(schema, f, indent=4)  # Using indentation to make output write on multiple lines
+            print(f"Output schema generated and saved at {output_filename}")
+            return output_filename
+    except Exception as ex:
+        print(ex)
